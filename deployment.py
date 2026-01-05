@@ -75,7 +75,7 @@ def initialize_mallam():
         id2label=id2label,
         label2id=label2id,
         device_map="cpu",        
-        torch_dtype=torch.float32
+        dtype=torch.float32
     )
 
     model = PeftModel.from_pretrained(base_model, mallam_path)
