@@ -110,7 +110,7 @@ def initialize_electra():
 
 import joblib
 def initialize_svm():
-    svm = joblib.load(MODULE_DIR /'detector-model/models/svm/tuned-svm.pkl')
+    svm = joblib.load('models/svm/tuned-svm.pkl')
     return svm 
 
 
