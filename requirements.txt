@@ -1,3 +1,7 @@
+torch==2.8.0
+torchao==0.13.0+git89053dd
+torchvision==0.24.0
+torchvision-extra-decoders==0.0.2
 accelerate==1.12.0
 aiofiles==24.1.0
 aiohappyeyeballs==2.6.1
@@ -187,10 +191,6 @@ tokenizers==0.22.2
 toml==0.10.2
 tomli==2.3.0
 tomlkit==0.13.3
-torch==2.8.0
-torchao==0.13.0+git89053dd
-torchvision==0.24.0
-torchvision-extra-decoders==0.0.2
 tornado==6.5.4
 tqdm==4.67.1
 traitlets==5.14.3
