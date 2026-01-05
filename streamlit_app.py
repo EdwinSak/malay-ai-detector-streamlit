@@ -69,12 +69,12 @@ def generate_token_chart():
 
 def run_inference(input_text):
     try:
-        import deployment_cloud
+        import deployment
         print('submitted')
         st.session_state.analysis_running = True
         st.session_state.last_input = input_text
-        # output = deployment_cloud.inference(mistral, mistral_tok, deployment_cloud.mistral_threshold, input_text)
-        output = deployment_cloud.ensemble_inference(
+        # output = deployment.inference(mistral, mistral_tok, deployment.mistral_threshold, input_text)
+        output = deployment.ensemble_inference(
             mallam=mallam,
             mallam_tok=mallam_tok,
             mistral=mistral,
@@ -436,36 +436,36 @@ spinner_text = 'Initializing models and tokenizers, please wait...'
     show_spinner=False
 )
 def init_mallam():
-    import deployment_cloud
-    return deployment_cloud.initialize_mallam()
+    import deployment
+    return deployment.initialize_mallam()
 
 @st.cache_resource(
     show_spinner=False
 )
 def init_mistral():
-    import deployment_cloud
-    return deployment_cloud.initialize_mistral()
+    import deployment
+    return deployment.initialize_mistral()
 
 @st.cache_resource(
     show_spinner=False
 )
 def init_electra():
-    import deployment_cloud
-    return deployment_cloud.initialize_electra()
+    import deployment
+    return deployment.initialize_electra()
 
 @st.cache_resource(
     show_spinner=False
 )
 def init_svm():
-    import deployment_cloud
-    return deployment_cloud.initialize_svm()
+    import deployment
+    return deployment.initialize_svm()
 
 
 if "model_ready" not in st.session_state:
     with status:
         print('initializing models')
         st.write("Initializing inference engine...")
-        import deployment_cloud
+        import deployment
 
         st.write("Loading Mallam...")
         mallam, mallam_tok = init_mallam()
@@ -480,8 +480,8 @@ if "model_ready" not in st.session_state:
         svm = init_svm()
         
         st.session_state.model_ready = True
-        st.session_state.current_threshold = deployment_cloud.ensemble_threshold
-        print('current threshold  =' + str(deployment_cloud.ensemble_threshold))
+        st.session_state.current_threshold = deployment.ensemble_threshold
+        print('current threshold  =' + str(deployment.ensemble_threshold))
 
         status.update(label="All models loaded!", state="complete", expanded=False)
         print('initalized models')
