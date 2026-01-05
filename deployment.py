@@ -148,13 +148,11 @@ def ensemble_inference(
     svm_pred, svm_probs, svm_tokens = svm_inference(svm, text)
     electra_pred, electra_probs, _  = inference(electra, electra_tok, electra_threshold, text)
     trust_scores = {
-        'mallam': 1,
-        'mistral': 0.33,
-        'electra': 0.5,
-        'svm': 0.25,
+        'mistral': 0.5,
+        'electra': 1,
+        'svm': 0.33,
     }
     model_names = [
-        'mallam', 
         'electra', 
         'mistral', 
         'svm'
@@ -168,7 +166,6 @@ def ensemble_inference(
     mistral_tokens = calculate_tokens(mistral_tok, input_text=text)
     electra_tokens = calculate_tokens(electra_tok, input_text=text)
     token_counts = {
-        'mallam': mallam_tokens,
         'mistral': mistral_tokens,
         'svm': svm_tokens,
         'electra': electra_tokens
