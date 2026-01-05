@@ -1,6 +1,5 @@
 import streamlit as st
 import joblib, time
-from st_circular_progress import CircularProgress
 st.title("Malay AI Text Detector", text_alignment='center', anchor=False)
 import textwrap
 
@@ -10,14 +9,6 @@ PAGE_LAYOUT = 'wide'
 st.set_page_config(layout=PAGE_LAYOUT)
 if 'analysis_running' not in st.session_state:
     st.session_state.analysis_running = False
-
-cp = CircularProgress(
-    label='AI Probability',
-    value=50,
-    key='circular_progress_ai_probs',
-    color='green',
-    size='Small',
-)
 
 def map_score(raw_score, threshold=0.5):
     if raw_score <= threshold:
@@ -468,7 +459,7 @@ def init_svm():
 if "model_ready" not in st.session_state:
     with status:
         print('initializing models')
-        st.write("Initializing Unsloth engine...")
+        st.write("Initializing inference engine...")
         import deployment
 
         st.write("Loading Mistral...")
