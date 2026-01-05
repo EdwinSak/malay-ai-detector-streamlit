@@ -36,7 +36,7 @@ def generate_token_chart():
         models = ['electra', 'mistral', 'svm']
         tokens = [st.session_state.last_result['token_counts'][m] for m in models]
     else:
-        tokens= [0,0,0]
+        tokens= [0,0,0,0]
     data = {
         'Model': ['Electra', 'Mistral', 'SVM'],
         'Tokens': tokens
@@ -57,7 +57,7 @@ def generate_token_chart():
     fig.update_layout(
         paper_bgcolor='#0e1117',
         plot_bgcolor='#0e1117',
-        height=400,
+        height=500,
         yaxis=dict(range=[0,None]),
         margin=dict(t=30, b=0, l=0, r=0),
         xaxis_title="", 
@@ -189,12 +189,12 @@ def generate_ai_proportion():
     return fig
 
 def generate_radar_chart():
-    categories = ['Mistral', 'Electra', 'SVM', 'Ensemble']
+    categories = ['Ensemble', 'Mistral', 'Electra', 'SVM']
     if 'last_result' in st.session_state:
         calibrated_props = st.session_state.last_result['calibrated_probs']
         scores = [calibrated_props[m] *100 for m in categories]
     else:
-        scores = [0,0,0,0]
+        scores = [0,0,0,0,0]
     categories_closed = categories + [categories[0]]
     scores_closed = scores + [scores[0]]
 
@@ -230,7 +230,7 @@ def generate_radar_chart():
                 tickfont=dict(size=16, color='white'),
             ),
             angularaxis=dict(
-                tickfont=dict(size=16, color='white', family="Arial"),
+                tickfont=dict(size=16, color='white', family="Arial"), 
                 rotation=90, 
                 direction="clockwise"
             ),
@@ -239,7 +239,7 @@ def generate_radar_chart():
         ),
         showlegend=False,
         margin=dict(t=30,b=20,l=40,r=40),
-        height=300,
+        height=500,
       
         paper_bgcolor='#0e1117'
     )
@@ -311,6 +311,11 @@ def generate_gauge_chart(name):
     return fig
 
 
+config = {
+    'staticPlot': True,        
+    'displayModeBar': False,
+}
+
 print('entire damn thing is rerun')
 @st.fragment
 def main_ui():
@@ -323,9 +328,15 @@ def main_ui():
         fig5 = generate_gauge_chart('Electra')
         fig6 = generate_gauge_chart('Mistral')
         fig7 = generate_gauge_chart('SVM')
+        fig8 = generate_gauge_chart('Ensemble')
+
 
         bar_chart = generate_token_chart()
          
+        # fig4 = generate_ai_score('Mallam')
+        # fig5 = generate_ai_score('Electra')
+        # fig6 = generate_ai_score('Mistral')
+        # fig7 = generate_ai_score('SVM')
 
         input_section, output_section= st.columns([2,1], gap='medium')
         dashboard_section = st.expander(label='Click to view additional analysis!')
@@ -355,13 +366,13 @@ def main_ui():
         with percentage_container:
             if 'last_result' in st.session_state:
                 st.text("There's a", width='stretch', text_alignment='center')
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, width='stretch', config=config)
                 st.text(f'likelihood your text is from AI', width='stretch', text_alignment='center')
             else:
                 st.text("AI Likelihood", width='stretch', text_alignment='center')
-                st.plotly_chart(fig, width='stretch')
+                st.plotly_chart(fig, width='stretch', config=config)
         with model_proportions_container:
-            st.plotly_chart(fig2, width='stretch')
+            st.plotly_chart(fig2, width='stretch', config=config)
             st.text("thinks your text is AI-generated", width='stretch', text_alignment='center')
         with dashboard_section:
             radar_section, gauge_section = st.columns([2,1], border=True)
@@ -369,25 +380,29 @@ def main_ui():
             with radar_section:
                 st.subheader('Score Summary', anchor=False)
                 with st.container(vertical_alignment='center', height='stretch'):
-                    st.plotly_chart(fig3, width='stretch')
+                    st.plotly_chart(fig3, width='stretch', config=config)
             # gauge_section = st.container()
             with gauge_section:
                 st.subheader('Model''s Opinion', anchor=False)
                 with st.container(gap='small'):
+                    # st.subheader('MaLLaM', text_alignment='center', anchor=False)
+                    st.text('Ensemble', text_alignment='center')
+                    st.plotly_chart(fig8, key='gauge_ensemble', width='content', config=config)
+                with st.container(gap='small'):
                     # st.subheader('Bahasa ELECTRA', text_alignment='center', anchor=False)
                     st.text('Bahasa ELECTRA', text_alignment='center')
-                    st.plotly_chart(fig5, key='gauge_electra', width='content')
+                    st.plotly_chart(fig5, key='gauge_electra', width='content', config=config)
                 with st.container(gap='small'):
                     # st.subheader('Malaysian Mistral', text_alignment='center', anchor=False)
                     st.text('Malaysian Mistral', text_alignment='center')
-                    st.plotly_chart(fig6, key='gauge_mistral', width='content')
+                    st.plotly_chart(fig6, key='gauge_mistral', width='content', config=config)
                 with st.container(gap='small'):
                     # st.subheader('SVM', text_alignment='center', anchor=False)
                     st.text('SVM', text_alignment='center')
-                    st.plotly_chart(fig7, key='gauge_svm', width='content')   
+                    st.plotly_chart(fig7, key='gauge_svm', width='content', config=config)   
             with st.container(border=True):
                 st.subheader('Token Count', anchor=False)
-                st.plotly_chart(bar_chart, key='token_chart')
+                st.plotly_chart(bar_chart, key='token_chart', config=config)
 
         if submit:
             if 'model_ready' not in st.session_state:
@@ -421,8 +436,6 @@ def main_ui():
 
 status = main_ui()
 spinner_text = 'Initializing models and tokenizers, please wait...'
-
-
 @st.cache_resource(
     show_spinner=False
 )
@@ -448,7 +461,7 @@ def init_svm():
 if "model_ready" not in st.session_state:
     with status:
         print('initializing models')
-        st.write("Initializing inference engine...")
+        st.write("Initializing Unsloth engine...")
         import deployment
 
         st.write("Loading Mistral...")
