@@ -1,5 +1,5 @@
 torch==2.8.0
-torchao==0.13.0+git89053dd
+torchao==0.13.0
 torchvision==0.24.0
 torchvision-extra-decoders==0.0.2
 accelerate==1.12.0
