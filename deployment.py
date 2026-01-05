@@ -1,6 +1,3 @@
-
-
-from unsloth import FastLanguageModel, FastModel
 import torch
 from transformers import AutoModelForSequenceClassification
 from pathlib import Path
@@ -28,19 +25,16 @@ def initialize_mistral():
     id2label = {0: "Human", 1: "AI"}
     label2id = {"Human": 0, "AI": 1}
 
-    mistral_model, mistral_tokenizer = FastModel.from_pretrained(
-        model_name = str(mistral_path),
-        auto_model = AutoModelForSequenceClassification,
-        max_seq_length = max_seq_length,
-        num_labels = 2,
-        id2label = id2label,
-        label2id = label2id,
-        load_in_4bit=False,
-        full_finetuning=True
+    mistral_tokenizer = AutoTokenizer.from_pretrained(mistral_path)
+    mistral_model = AutoModelForSequenceClassification.from_pretrained(
+        str(mistral_path),
+        num_labels=2,
+        id2label=id2label,
+        label2id=label2id,
+        device_map="cpu" 
     )
-    FastModel.for_inference(mistral_model)
+    mistral_model.eval()
     return mistral_model, mistral_tokenizer
-
 
 def inference(
         model, 
@@ -52,7 +46,7 @@ def inference(
         text = input()
     with torch.inference_mode():
         print(f'running inference for {model.config._name_or_path}')
-        inputs = tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=max_seq_length).to("cuda")
+        inputs = tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=max_seq_length).to("cpu")
         print(f"dtype: {inputs['input_ids'].dtype}")        
         outputs = model(**inputs)
         token_count = inputs["input_ids"].shape[1]
@@ -65,28 +59,32 @@ def inference(
             pred = 'Human'
     return pred, ai_probs, token_count
 
+from peft import PeftModel
 
 def initialize_mallam():
-    mallam_path = MODULE_DIR /'detector-model/models/mallam-1.1B-4096/checkpoint-873'
     mallam_path = 'SmartestBoy/mallam-ai-detector'
-
+    
+    tokenizer = AutoTokenizer.from_pretrained(mallam_path)
+    
     id2label = {0: "Human", 1: "AI"}
     label2id = {"Human": 0, "AI": 1}
 
-    mallam_model, mallam_tokenizer = FastModel.from_pretrained(
-        model_name = str(mallam_path),
-        auto_model = AutoModelForSequenceClassification,
-        max_seq_length = max_seq_length,
-        num_labels = 2,
-        id2label = id2label,
-        label2id = label2id,
-        load_in_4bit=True,
+    base_model = AutoModelForSequenceClassification.from_pretrained(
+        mallam_path, 
+        num_labels=2,
+        id2label=id2label,
+        label2id=label2id,
+        device_map="cpu",        
+        torch_dtype=torch.float32
     )
-    FastModel.for_inference(mallam_model)
-    return mallam_model, mallam_tokenizer
+
+    model = PeftModel.from_pretrained(base_model, mallam_path)
+    
+    model = model.merge_and_unload()
+    model.eval()
+    return model, tokenizer
 
 
-from unsloth import FastLanguageModel, FastModel
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
@@ -102,7 +100,7 @@ def initialize_electra():
         num_labels = 2,
         id2label = id2label,
         label2id = label2id,
-        device_map='auto'
+        device_map='cpu'
     )
 
     electra_tokenizer = AutoTokenizer.from_pretrained(electra_path)
@@ -112,7 +110,7 @@ def initialize_electra():
 
 import joblib
 def initialize_svm():
-    svm = joblib.load('models/svm/tuned-svm.pkl')
+    svm = joblib.load(MODULE_DIR /'detector-model/models/svm/tuned-svm.pkl')
     return svm 
 
 
