@@ -22,6 +22,8 @@ def calculate_tokens(tokenizer, input_text):
 
 def initialize_mistral():
     mistral_path = MODULE_DIR /'detector-model/models/malaysian-mistral-64M-4096/checkpoint-873'
+    mistral_path = 'SmartestBoy/malaysian-mistral-ai-detector'
+
 
     id2label = {0: "Human", 1: "AI"}
     label2id = {"Human": 0, "AI": 1}
@@ -66,6 +68,7 @@ def inference(
 
 def initialize_mallam():
     mallam_path = MODULE_DIR /'detector-model/models/mallam-1.1B-4096/checkpoint-873'
+    mallam_path = 'SmartestBoy/mallam-ai-detector'
 
     id2label = {0: "Human", 1: "AI"}
     label2id = {"Human": 0, "AI": 1}
@@ -90,7 +93,7 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 def initialize_electra():
     electra_path = MODULE_DIR /'detector-model/models/electra-base-discriminator-bahasa-cased-512-seq/checkpoint-873'
-
+    electra_path = 'SmartestBoy/electra-malay-ai-detector'
     id2label = {0: "Human", 1: "AI"}
     label2id = {"Human": 0, "AI": 1}
 
@@ -109,7 +112,7 @@ def initialize_electra():
 
 import joblib
 def initialize_svm():
-    svm = joblib.load(MODULE_DIR /'detector-model/models/svm/tuned-svm.pkl')
+    svm = joblib.load('models/svm/tuned-svm.pkl')
     return svm 
 
 
