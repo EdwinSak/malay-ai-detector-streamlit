@@ -58,7 +58,15 @@ def generate_token_chart():
         paper_bgcolor='#0e1117',
         plot_bgcolor='#0e1117',
         height=500,
-        yaxis=dict(range=[0,None]),
+        yaxis=dict(
+            range=[0,None],
+            tickfont=dict(size=20),  
+            title=dict(text="Tokens", font=dict(size=18))
+        ),
+        xaxis=dict(
+            tickfont=dict(size=20),
+            title=dict(font=dict(size=18))
+        ),
         margin=dict(t=30, b=0, l=0, r=0),
         xaxis_title="", 
         showlegend=False,
@@ -238,7 +246,7 @@ def generate_radar_chart():
             gridshape='linear'
         ),
         showlegend=False,
-        margin=dict(t=30,b=20,l=40,r=40),
+        margin=dict(t=30,b=50,l=40,r=40),
         height=500,
       
         paper_bgcolor='#0e1117'
