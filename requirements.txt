@@ -1,4 +1,4 @@
-torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+https://download.pytorch.org/whl/cpu/torch-2.9.1%2Bcpu-cp312-cp312-linux_x86_64.whl
 accelerate==1.12.0
 aiofiles==24.1.0
 aiohappyeyeballs==2.6.1
