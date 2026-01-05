@@ -339,7 +339,8 @@ def main_ui():
         input_section, output_section= st.columns([2,1], gap='medium')
         dashboard_section = st.expander(label='Click to view additional analysis!')
         with input_section:
-            with st.form("text_form", height=COLUMN_HEIGHT):
+            form = st.form("text_form", height=COLUMN_HEIGHT)
+            with form:
                 input_text = st.text_area("Input text", height=COLUMN_HEIGHT-100, placeholder="Enter Malay text here...")
                 submit = st.form_submit_button("Detect")
         with output_section:
@@ -406,7 +407,8 @@ def main_ui():
             if 'model_ready' not in st.session_state:
                 st.toast('Model not ready yet, please wait!', icon='🛎️')
             elif ('last_input' in st.session_state) and st.session_state.last_input == input_text:
-                st.warning('You are putting the same thing again. No evaluation was done.', icon="⚠️")
+                with form:
+                    st.warning('You are putting the same thing again. No evaluation was done.', icon="⚠️")
             else:
                 st.toast('Running inference...', icon='🔍')
                 st.session_state.analysis_running = True
