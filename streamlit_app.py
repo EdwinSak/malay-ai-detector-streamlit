@@ -36,7 +36,7 @@ def generate_token_chart():
         models = ['electra', 'mistral', 'svm']
         tokens = [st.session_state.last_result['token_counts'][m] for m in models]
     else:
-        tokens= [0,0,0,0]
+        tokens= [0,0,0]
     data = {
         'Model': ['Electra', 'Mistral', 'SVM'],
         'Tokens': tokens
@@ -194,7 +194,7 @@ def generate_radar_chart():
         calibrated_props = st.session_state.last_result['calibrated_probs']
         scores = [calibrated_props[m] *100 for m in categories]
     else:
-        scores = [0,0,0,0,0]
+        scores = [0,0,0,0]
     categories_closed = categories + [categories[0]]
     scores_closed = scores + [scores[0]]
 
@@ -329,7 +329,6 @@ def main_ui():
         fig6 = generate_gauge_chart('Mistral')
         fig7 = generate_gauge_chart('SVM')
         fig8 = generate_gauge_chart('Ensemble')
-
 
         bar_chart = generate_token_chart()
          
