@@ -1,5 +1,5 @@
 --extra-index-url https://download.pytorch.org/whl/cu126
-torch==2.8.0
+torch~=2.8.0
 torchvision==0.24.0
 torchvision-extra-decoders==0.0.2
 torchao==0.13.0
