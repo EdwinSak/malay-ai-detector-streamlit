@@ -134,8 +134,6 @@ def svm_inference(svm, text=None):
 import numpy as np
 
 def ensemble_inference(
-        mallam,
-        mallam_tok,
         mistral,
         mistral_tok,
         electra,
@@ -146,7 +144,6 @@ def ensemble_inference(
     if text == None:
         text = input()
     print('text is ' + text)
-    mallam_pred, mallam_probs, _  = inference(mallam, mallam_tok, mallam_threshold, text)
     mistral_pred, mistral_probs, _  = inference(mistral, mistral_tok, mistral_threshold, text)
     svm_pred, svm_probs, svm_tokens = svm_inference(svm, text)
     electra_pred, electra_probs, _  = inference(electra, electra_tok, electra_threshold, text)
@@ -163,7 +160,6 @@ def ensemble_inference(
         'svm'
     ]
     prob_data_map = {
-        'mallam': mallam_probs,
         'electra': electra_probs,
         'mistral': mistral_probs,
         'svm': svm_probs
@@ -171,7 +167,6 @@ def ensemble_inference(
 
     mistral_tokens = calculate_tokens(mistral_tok, input_text=text)
     electra_tokens = calculate_tokens(electra_tok, input_text=text)
-    mallam_tokens = calculate_tokens(mallam_tok, input_text=text)
     token_counts = {
         'mallam': mallam_tokens,
         'mistral': mistral_tokens,
@@ -193,7 +188,6 @@ def ensemble_inference(
             
 
     ai_sum = sum([
-        mallam_pred == 'AI',
         mistral_pred == 'AI',
         svm_pred == 'AI',
         electra_pred == 'AI',
@@ -203,7 +197,6 @@ def ensemble_inference(
 
     uncalibrated_probs = {
         'mistral': mistral_probs,
-        'mallam': mallam_probs,
         'electra': electra_probs,
         'svm': svm_probs,
         'ensemble': final_probs
@@ -216,7 +209,6 @@ def ensemble_inference(
         'prob': final_probs,
         'calibrated_probs': calibrated_probs,
         'mistral_probs': mistral_probs,
-        'mallam_probs': mallam_probs,
         'electra_probs': electra_probs,
         'svm_probs': svm_probs,
         'ai_sum': ai_sum,
@@ -234,14 +226,12 @@ def map_score(raw_score, threshold=0.5):
 
 
 def calibrate_probs(raw):
-    mallam_probs =  map_score(raw['mallam'], mallam_threshold)
     mistral_probs =  map_score(raw['mistral'], mistral_threshold)
     electra_probs =  map_score(raw['electra'], electra_threshold)
     svm_probs =  map_score(raw['svm'], svm_threshold)
     ensemble_probs =  map_score(raw['ensemble'], ensemble_threshold)
 
     results = {
-        "Mallam": mallam_probs,
         "Mistral": mistral_probs,
         "Electra": electra_probs,
         "SVM": svm_probs,

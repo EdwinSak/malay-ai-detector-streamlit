@@ -33,12 +33,12 @@ import plotly.express as px
 
 def generate_token_chart():
     if 'last_result' in st.session_state:
-        models = ['mallam', 'electra', 'mistral', 'svm']
+        models = ['electra', 'mistral', 'svm']
         tokens = [st.session_state.last_result['token_counts'][m] for m in models]
     else:
-        tokens= [0,0,0,0]
+        tokens= [0,0,0]
     data = {
-        'Model': ['Mallam', 'Electra', 'Mistral', 'SVM'],
+        'Model': ['Electra', 'Mistral', 'SVM'],
         'Tokens': tokens
     }
     df = pd.DataFrame(data)
@@ -75,8 +75,6 @@ def run_inference(input_text):
         st.session_state.last_input = input_text
         # output = deployment.inference(mistral, mistral_tok, deployment.mistral_threshold, input_text)
         output = deployment.ensemble_inference(
-            mallam=mallam,
-            mallam_tok=mallam_tok,
             mistral=mistral,
             mistral_tok=mistral_tok,
             electra=electra,
@@ -191,12 +189,12 @@ def generate_ai_proportion():
     return fig
 
 def generate_radar_chart():
-    categories = ['Mallam', 'Mistral', 'Electra', 'SVM', 'Ensemble']
+    categories = ['Mistral', 'Electra', 'SVM', 'Ensemble']
     if 'last_result' in st.session_state:
         calibrated_props = st.session_state.last_result['calibrated_probs']
         scores = [calibrated_props[m] *100 for m in categories]
     else:
-        scores = [0,0,0,0,0]
+        scores = [0,0,0,0]
     categories_closed = categories + [categories[0]]
     scores_closed = scores + [scores[0]]
 
@@ -232,8 +230,8 @@ def generate_radar_chart():
                 tickfont=dict(size=16, color='white'),
             ),
             angularaxis=dict(
-                tickfont=dict(size=16, color='white', family="Arial"), # Font for Model Names
-                rotation=90, # Starts Mallam at the top
+                tickfont=dict(size=16, color='white', family="Arial"),
+                rotation=90, 
                 direction="clockwise"
             ),
             bgcolor='#0e1117',
@@ -322,17 +320,12 @@ def main_ui():
         fig2 = generate_ai_proportion()
         fig3 = generate_radar_chart()
 
-        fig4 = generate_gauge_chart('Mallam')
         fig5 = generate_gauge_chart('Electra')
         fig6 = generate_gauge_chart('Mistral')
         fig7 = generate_gauge_chart('SVM')
 
         bar_chart = generate_token_chart()
          
-        # fig4 = generate_ai_score('Mallam')
-        # fig5 = generate_ai_score('Electra')
-        # fig6 = generate_ai_score('Mistral')
-        # fig7 = generate_ai_score('SVM')
 
         input_section, output_section= st.columns([2,1], gap='medium')
         dashboard_section = st.expander(label='Click to view additional analysis!')
@@ -381,10 +374,6 @@ def main_ui():
             with gauge_section:
                 st.subheader('Model''s Opinion', anchor=False)
                 with st.container(gap='small'):
-                    # st.subheader('MaLLaM', text_alignment='center', anchor=False)
-                    st.text('MaLLaM', text_alignment='center')
-                    st.plotly_chart(fig4, key='gauge_mallam', width='content')
-                with st.container(gap='small'):
                     # st.subheader('Bahasa ELECTRA', text_alignment='center', anchor=False)
                     st.text('Bahasa ELECTRA', text_alignment='center')
                     st.plotly_chart(fig5, key='gauge_electra', width='content')
@@ -432,12 +421,7 @@ def main_ui():
 
 status = main_ui()
 spinner_text = 'Initializing models and tokenizers, please wait...'
-@st.cache_resource(
-    show_spinner=False
-)
-def init_mallam():
-    import deployment
-    return deployment.initialize_mallam()
+
 
 @st.cache_resource(
     show_spinner=False
@@ -467,9 +451,6 @@ if "model_ready" not in st.session_state:
         st.write("Initializing inference engine...")
         import deployment
 
-        st.write("Loading Mallam...")
-        mallam, mallam_tok = init_mallam()
-        
         st.write("Loading Mistral...")
         mistral, mistral_tok = init_mistral()
         
@@ -486,7 +467,6 @@ if "model_ready" not in st.session_state:
         status.update(label="All models loaded!", state="complete", expanded=False)
         print('initalized models')
 else:
-    mallam, mallam_tok = init_mallam()
     mistral, mistral_tok = init_mistral()
     electra, electra_tok = init_electra()
     svm = init_svm()
