@@ -312,8 +312,9 @@ def check_input_length(text):
         success = False
         msg = 'Text are too short! Please enter atleast 100 words for accurate detection.'
     elif len(words) >400:
-        success = False
+        success = True
         msg = 'Text are too long. Some tokens may be truncated.'
+        st.toast(msg, icon='⚠️')
     elif len(words) >= 100 :
         success = True
         msg = 'Text within healthy range.'
