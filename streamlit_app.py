@@ -4,6 +4,7 @@ st.title("Malay AI Text Detector", text_alignment='center', anchor=False)
 import textwrap
 
 COLUMN_HEIGHT = 725
+TOTAL_MODELS = 4
 PAGE_LAYOUT = 'wide'
 if 'unsafe_length' not in st.session_state:
     print('disabling unsafe length')
@@ -154,7 +155,7 @@ def generate_ai_proportion():
     else:
         sum = 0 
 
-    remaining = 5 - sum
+    remaining = TOTAL_MODELS - sum
 
     fig = go.Figure(data=[go.Pie(
         labels=['AI', 'Human'],
@@ -171,7 +172,7 @@ def generate_ai_proportion():
 
     fig.update_layout(
         annotations=[dict(
-            text=f"<b>{sum}/5<br>Models</b>", 
+            text=f"<b>{sum}/{TOTAL_MODELS}<br>Models</b>", 
             x=0.5, y=0.5, 
             font_size=22, 
             showarrow=False,
