@@ -99,7 +99,6 @@ def run_inference(input_text):
 def generate_ai_score(name='Ensemble'):
     last_result = st.session_state.get('last_result', [])
     if last_result:
-        print(last_result)
         probability = last_result['calibrated_probs'][name]
         print(f'probability: {probability}')
         score = map_score(probability, st.session_state.current_threshold)
@@ -151,16 +150,11 @@ def generate_ai_score(name='Ensemble'):
 def generate_ai_proportion():
     last_result = st.session_state.get('last_result', [])
     if last_result:
-        print(last_result)
         sum = last_result['ai_sum']
-        print(f'total_sum: {sum}')
     else:
         sum = 0 
 
     remaining = 5 - sum
-    print(type(sum))
-    print(type(remaining))
-
 
     fig = go.Figure(data=[go.Pie(
         labels=['AI', 'Human'],
@@ -184,7 +178,7 @@ def generate_ai_proportion():
             font_color='#e8e8e8'
         )],
         showlegend=False,      
-        margin=dict(t=20, b=20, l=20, r=20),
+        margin=dict(t=20, b=20, l=0, r=0),
         height=170
     )
     return fig
@@ -198,8 +192,6 @@ def generate_radar_chart():
         scores = [0,0,0,0]
     categories_closed = categories + [categories[0]]
     scores_closed = scores + [scores[0]]
-
-    print(scores)
 
     fig = go.Figure()
 
@@ -253,11 +245,8 @@ import plotly.graph_objects as go
 def generate_gauge_chart(name):
     last_result = st.session_state.get('last_result', [])
     if last_result:
-        print(last_result)
         probability = last_result['calibrated_probs'][name]
-        print(f'probability: {probability}')
         score = map_score(probability, st.session_state.current_threshold)
-        print(f'score: {score}')
         score = round(score*100, 2)
     else:
         score = 0
@@ -379,12 +368,12 @@ def main_ui():
         dashboard_section = st.expander(label='Click to view additional analysis!')
         developer_settings = st.expander(label='Developer settings')
         with input_section:
-            form = st.container(height=COLUMN_HEIGHT)
+            form = st.form('text_form', height=COLUMN_HEIGHT)
             with form:
                 input_text = st.text_area("Input text", height=COLUMN_HEIGHT-100, placeholder="Enter Malay text here...")
                 control_section = st.container(horizontal=True, horizontal_alignment='distribute')
             with control_section:
-                submit = st.button("Detect", type='secondary')
+                submit = st.form_submit_button("Detect", type='secondary')
         with output_section:
             result_container = st.container(border=True, height=COLUMN_HEIGHT,gap='small')
             with result_container:
@@ -426,15 +415,19 @@ def main_ui():
             with gauge_section:
                 st.subheader('Model''s Opinion', anchor=False)
                 with st.container(gap='small'):
+                    # st.subheader('MaLLaM', text_alignment='center', anchor=False)
                     st.text('Ensemble', text_alignment='center')
                     st.plotly_chart(fig8, key='gauge_ensemble', width='content', config=config)
                 with st.container(gap='small'):
+                    # st.subheader('Bahasa ELECTRA', text_alignment='center', anchor=False)
                     st.text('Bahasa ELECTRA', text_alignment='center')
                     st.plotly_chart(fig5, key='gauge_electra', width='content', config=config)
                 with st.container(gap='small'):
+                    # st.subheader('Malaysian Mistral', text_alignment='center', anchor=False)
                     st.text('Malaysian Mistral', text_alignment='center')
                     st.plotly_chart(fig6, key='gauge_mistral', width='content', config=config)
                 with st.container(gap='small'):
+                    # st.subheader('SVM', text_alignment='center', anchor=False)
                     st.text('SVM', text_alignment='center')
                     st.plotly_chart(fig7, key='gauge_svm', width='content', config=config)   
             with st.container(border=True):
@@ -444,7 +437,6 @@ def main_ui():
         if submit:
             print('submit pressed')
             if 'model_ready' not in st.session_state:
-                print('stuff is just not ready stop pressing')
                 st.toast('Model not ready yet, please wait!', icon='🛎️')
             elif ('last_input' in st.session_state) and st.session_state.last_input == input_text:
                 with form:
@@ -523,6 +515,7 @@ with status:
     print('initializing models')
     st.write("Initializing inference engine...")
     import deployment
+
     st.write("Loading Mistral...")
     mistral, mistral_tok = init_mistral()
     
@@ -534,12 +527,10 @@ with status:
     
     st.session_state.model_ready = True
     st.session_state.current_threshold = deployment.ensemble_threshold
-    print('current threshold  =' + str(deployment.ensemble_threshold))
+    print('Current threshold  =' + str(deployment.ensemble_threshold))
 
     status.update(label="All models loaded!", state="complete", expanded=False)
     print('initalized models')
-
-
 
 
 if "model_ready" in st.session_state and 'ready_shown_notification' not in st.session_state:
