@@ -247,8 +247,7 @@ def generate_gauge_chart(name):
     last_result = st.session_state.get('last_result', [])
     if last_result:
         probability = last_result['calibrated_probs'][name]
-        score = map_score(probability, st.session_state.current_threshold)
-        score = round(score*100, 2)
+        score = round(probability*100, 2)
     else:
         score = 0
     if score>=95:
