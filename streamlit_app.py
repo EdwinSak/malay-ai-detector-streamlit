@@ -5,6 +5,9 @@ import textwrap
 
 COLUMN_HEIGHT = 725
 PAGE_LAYOUT = 'wide'
+if 'unsafe_length' not in st.session_state:
+    print('disabling unsafe length')
+    st.session_state.unsafe_length=False
 
 st.set_page_config(layout=PAGE_LAYOUT)
 if 'analysis_running' not in st.session_state:
@@ -42,7 +45,6 @@ def generate_token_chart():
         color_discrete_sequence=['#FFC759', '#FF7B9C', '#607196', '#BABFD1'],
         template='plotly_dark'
     )
-
 
     fig.update_traces(width=0.4)
     fig.update_layout(
@@ -182,7 +184,7 @@ def generate_ai_proportion():
             font_color='#e8e8e8'
         )],
         showlegend=False,      
-        margin=dict(t=20, b=20, l=0, r=0),
+        margin=dict(t=20, b=20, l=20, r=20),
         height=170
     )
     return fig
@@ -310,12 +312,48 @@ def generate_gauge_chart(name):
     return fig
 
 
+def check_input_length(text):
+    msg = 'error'
+    success = False
+    words = text.split(' ')
+    if st.session_state.unsafe_length:
+        success =True
+        msg = 'Unsafe detection enabled. Bypassing length limits '
+    elif len(words) < 100:
+        success = False
+        msg = 'Text are too short! Please enter atleast 100 words for accurate detection.'
+    elif len(words) >400:
+        success = False
+        msg = 'Text are too long. Some tokens may be truncated.'
+    elif len(words) >= 100 :
+        success = True
+        msg = 'Text within healthy range.'
+    return {
+        'success': success,
+        'msg': msg
+    }
+
 config = {
     'staticPlot': True,        
     'displayModeBar': False,
 }
 
-print('entire damn thing is rerun')
+
+@st.dialog(title='Unsafe Mode')
+def unsafe_confirmation():
+    if st.session_state.unsafe_length:
+        st.write("⚠️ **Warning:** Text length limits will be enforced. Are you sure you want to proceed?")
+        with st.container(horizontal=True, horizontal_alignment='center'):
+            if st.button("Ok", type='primary'):
+                st.session_state.unsafe_length = False
+                st.rerun()
+    else:
+        st.write("⚠️ **Warning:** Enabling unsafe mode bypass text length validation that may result in unreliable detections. Are you sure you want to proceed?")
+        with st.container(horizontal=True, horizontal_alignment='center'):
+            if st.button("I understand the risks", type='primary'):
+                st.session_state.unsafe_length = True
+                st.rerun()
+
 @st.fragment
 def main_ui():
     @st.fragment
@@ -329,6 +367,7 @@ def main_ui():
         fig7 = generate_gauge_chart('SVM')
         fig8 = generate_gauge_chart('Ensemble')
 
+
         bar_chart = generate_token_chart()
          
         # fig4 = generate_ai_score('Mallam')
@@ -338,11 +377,14 @@ def main_ui():
 
         input_section, output_section= st.columns([2,1], gap='medium')
         dashboard_section = st.expander(label='Click to view additional analysis!')
+        developer_settings = st.expander(label='Developer settings')
         with input_section:
-            form = st.form("text_form", height=COLUMN_HEIGHT)
+            form = st.container(height=COLUMN_HEIGHT)
             with form:
                 input_text = st.text_area("Input text", height=COLUMN_HEIGHT-100, placeholder="Enter Malay text here...")
-                submit = st.form_submit_button("Detect")
+                control_section = st.container(horizontal=True, horizontal_alignment='distribute')
+            with control_section:
+                submit = st.button("Detect", type='secondary')
         with output_section:
             result_container = st.container(border=True, height=COLUMN_HEIGHT,gap='small')
             with result_container:
@@ -384,19 +426,15 @@ def main_ui():
             with gauge_section:
                 st.subheader('Model''s Opinion', anchor=False)
                 with st.container(gap='small'):
-                    # st.subheader('MaLLaM', text_alignment='center', anchor=False)
                     st.text('Ensemble', text_alignment='center')
                     st.plotly_chart(fig8, key='gauge_ensemble', width='content', config=config)
                 with st.container(gap='small'):
-                    # st.subheader('Bahasa ELECTRA', text_alignment='center', anchor=False)
                     st.text('Bahasa ELECTRA', text_alignment='center')
                     st.plotly_chart(fig5, key='gauge_electra', width='content', config=config)
                 with st.container(gap='small'):
-                    # st.subheader('Malaysian Mistral', text_alignment='center', anchor=False)
                     st.text('Malaysian Mistral', text_alignment='center')
                     st.plotly_chart(fig6, key='gauge_mistral', width='content', config=config)
                 with st.container(gap='small'):
-                    # st.subheader('SVM', text_alignment='center', anchor=False)
                     st.text('SVM', text_alignment='center')
                     st.plotly_chart(fig7, key='gauge_svm', width='content', config=config)   
             with st.container(border=True):
@@ -404,16 +442,32 @@ def main_ui():
                 st.plotly_chart(bar_chart, key='token_chart', config=config)
 
         if submit:
+            print('submit pressed')
             if 'model_ready' not in st.session_state:
+                print('stuff is just not ready stop pressing')
                 st.toast('Model not ready yet, please wait!', icon='🛎️')
             elif ('last_input' in st.session_state) and st.session_state.last_input == input_text:
                 with form:
                     st.warning('You are putting the same thing again. No evaluation was done.', icon="⚠️")
             else:
-                st.toast('Running inference...', icon='🔍')
-                st.session_state.analysis_running = True
-                run_inference(input_text)
-                st.rerun(scope='fragment')
+                sanity_check = check_input_length(input_text)
+                if sanity_check['success']:
+                    st.toast('Running inference...', icon='🔍')
+                    st.session_state.analysis_running = True
+                    run_inference(input_text)
+                    st.rerun(scope='fragment')
+                else:
+                    with form:
+                        msg = sanity_check['msg']
+                        st.warning(f'{msg}', icon="⚠️")
+        with developer_settings:
+            if st.session_state.unsafe_length:
+                btn_type = 'Disable'
+            else:
+                btn_type = 'Enable'
+            bypass_button = st.button(f'{btn_type} Unsafe Detector', type='primary')
+        if bypass_button:
+            unsafe_confirmation()
 
     _, main_col, _ = st.columns([1,3,1])
     with main_col:
@@ -439,6 +493,13 @@ spinner_text = 'Initializing models and tokenizers, please wait...'
 @st.cache_resource(
     show_spinner=False
 )
+def init_mallam():
+    import deployment
+    return deployment.initialize_mallam()
+
+@st.cache_resource(
+    show_spinner=False
+)
 def init_mistral():
     import deployment
     return deployment.initialize_mistral()
@@ -458,32 +519,25 @@ def init_svm():
     return deployment.initialize_svm()
 
 
-if "model_ready" not in st.session_state:
-    with status:
-        print('initializing models')
-        st.write("Initializing inference engine...")
-        import deployment
-
-        st.write("Loading Mistral...")
-        mistral, mistral_tok = init_mistral()
-        
-        st.write("Loading Electra...")
-        electra, electra_tok = init_electra()
-
-        st.write("Loading SVM...")
-        svm = init_svm()
-        
-        st.session_state.model_ready = True
-        st.session_state.current_threshold = deployment.ensemble_threshold
-        print('current threshold  =' + str(deployment.ensemble_threshold))
-
-        status.update(label="All models loaded!", state="complete", expanded=False)
-        print('initalized models')
-else:
+with status:
+    print('initializing models')
+    st.write("Initializing inference engine...")
+    import deployment
+    st.write("Loading Mistral...")
     mistral, mistral_tok = init_mistral()
+    
+    st.write("Loading Electra...")
     electra, electra_tok = init_electra()
-    svm = init_svm()
 
+    st.write("Loading SVM...")
+    svm = init_svm()
+    
+    st.session_state.model_ready = True
+    st.session_state.current_threshold = deployment.ensemble_threshold
+    print('current threshold  =' + str(deployment.ensemble_threshold))
+
+    status.update(label="All models loaded!", state="complete", expanded=False)
+    print('initalized models')
 
 
 
@@ -491,11 +545,3 @@ else:
 if "model_ready" in st.session_state and 'ready_shown_notification' not in st.session_state:
     st.toast("Model Loaded Successfully!", icon="🚀")
     st.session_state.ready_shown_notification = True
-
-
-
-
-# if st.session_state.analysis_running:
-    
-
-
