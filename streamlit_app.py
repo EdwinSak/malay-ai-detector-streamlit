@@ -469,7 +469,7 @@ def main_ui():
             st.markdown(textwrap.dedent('''**Please read the following instructions carefully to ensure appropriate use of the Malay AI Detector.**
                 \n- This detector is made for detecting **Malay** text only. Detection of any other languages including English are not supported as of right now.
                 \n- Please ensure that there are atleast 100 words in the input for a more reliable estimate. Results with word count below 100 are not reliable and should not be taken as proof.   
-                \n- The detector has a maximum limit of 512 tokens, which is roughly around 300-350 words. Exceeding the word limit would not result in an error, but the model will truncate the exceess tokens internally, making extra words effectively useless.
+                \n- The detector has a maximum limit of 512 tokens, which is roughly around 350-400 words. Exceeding the word limit would not result in an error, but the model will truncate the exceess tokens internally, making extra words effectively useless.
                 \n- The results from this detector should only be used for reference and not as conclusive evidence of AI use. Please consult your respective AI ethics board for evaluation guidelines procedure.
                 \n- This detector is by no means perfect. Paraphrasing and manual alteration of AI text may bypass detection. Therefore, do use other specialized tools to detect such alteration.         
                 \n- Copying from AI directly for school assignments is strongly discouraged. Please use AI ethically and responsibly.

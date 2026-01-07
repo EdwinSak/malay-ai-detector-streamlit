@@ -6,7 +6,7 @@ mistral_threshold = 0.7059877514839172
 electra_threshold = 0.9441768527030945
 mallam_threshold = 0.13432104885578156
 svm_threshold = 0.6771792032000351
-ensemble_threshold = 0.5901625688706253
+ensemble_threshold = 0.6190963642043329
 
 MODULE_DIR = Path(__file__).resolve().parent.parent
 
